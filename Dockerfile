@@ -5,6 +5,10 @@ RUN npm install pnpm -g
 # 安装 Git
 RUN apk add --no-cache git
 
+# 设置npm镜像
+RUN npm config set registry https://registry.npmmirror.com
+RUN pnpm config set registry https://registry.npmmirror.com
+
 WORKDIR /app
 
 COPY ./package.json /app
@@ -24,6 +28,10 @@ FROM node:lts-alpine as backend
 
 RUN npm install pnpm -g
 
+# 设置npm镜像
+RUN npm config set registry https://registry.npmmirror.com
+RUN pnpm config set registry https://registry.npmmirror.com
+
 WORKDIR /app
 
 COPY /service/package.json /app
@@ -40,6 +48,10 @@ RUN pnpm build
 FROM node:lts-alpine
 
 RUN npm install pnpm -g
+
+# 设置npm镜像
+RUN npm config set registry https://registry.npmmirror.com
+RUN pnpm config set registry https://registry.npmmirror.com
 
 WORKDIR /app
 
