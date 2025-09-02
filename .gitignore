@@ -31,3 +31,6 @@ coverage
 # Environment variables files
 /service/.env
 /service/uploads
+
+# Docker compose files with sensitive information
+docker-compose/docker-compose.yml
