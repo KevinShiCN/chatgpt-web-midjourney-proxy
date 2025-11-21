@@ -3,9 +3,10 @@ import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { setupPageGuard } from './permission'
 import { ChatLayout } from '@/views/chat/layout'
-import mjlayout from '@/views/mj/layout.vue'
-import sunoLayout from '@/views/suno/layout.vue'
-import lumaLayout from '@/views/luma/layout.vue'
+// 以下 layout 组件已禁用（只保留对话功能）
+// import mjlayout from '@/views/mj/layout.vue'
+// import sunoLayout from '@/views/suno/layout.vue'
+// import lumaLayout from '@/views/luma/layout.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -62,76 +63,54 @@ const routes: RouteRecordRaw[] = [
   },
 
 
+  // 以下路由已禁用，重定向到对话页面
   {
     path: '/draw',
     name: 'Rootdraw',
-    component: mjlayout,
-    redirect: '/draw/index',
-    children: [
-      {
-        path: '/draw/:uuid?',
-        name: 'draw',
-        component: () => import('@/views/mj/draw.vue'),
-      },
-    ],
+    redirect: '/chat',
+  },
+  {
+    path: '/draw/:uuid?',
+    redirect: '/chat',
   },
 
     {
     path: '/music',
     name: 'music',
-    component: sunoLayout,
-    redirect: '/music/index',
-    children: [
-      {
-        path: '/music/:uuid?',
-        name: 'music',
-        component: () => import('@/views/suno/music.vue'),
-      },
-    ],
-
-    
-
+    redirect: '/chat',
+  },
+  {
+    path: '/music/:uuid?',
+    redirect: '/chat',
   },
   {
     path: '/video',
     name: 'video',
-    component: lumaLayout,
-    redirect: '/video/index',
-    children: [
-      {
-        path: '/video/:uuid?',
-        name: 'video',
-        component: () => import('@/views/luma/video.vue'),
-      },
-    ],
+    redirect: '/chat',
+  },
+  {
+    path: '/video/:uuid?',
+    redirect: '/chat',
   },
 
   {
     path: '/dance',
     name: 'dance',
-    component: lumaLayout,
-    redirect: '/dance/index',
-    children: [
-      {
-        path: '/dance/:uuid?',
-        name: 'dance',
-        component: () => import('@/views/viggle/dance.vue'),
-      },
-    ],
+    redirect: '/chat',
+  },
+  {
+    path: '/dance/:uuid?',
+    redirect: '/chat',
   },
 
   {
     path: '/wav',
     name: 'wav',
-    component: lumaLayout,
-    redirect: '/wav/index',
-    children: [
-      {
-        path: '/wav/:uuid?',
-        name: 'wav',
-        component: () => import('@/views/wav/wav.vue'),
-      },
-    ],
+    redirect: '/chat',
+  },
+  {
+    path: '/wav/:uuid?',
+    redirect: '/chat',
   },
 
   //调试
