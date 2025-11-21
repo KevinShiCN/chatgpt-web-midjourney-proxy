@@ -1,0 +1,94 @@
+{
+  "project_name": "chatgpt-web-midjourney-proxy",
+  "scan_timestamp": "2025-11-21T19:36:43.000Z",
+  "version": "2.25.3",
+  "modules": [
+    {
+      "name": "frontend",
+      "path": "src",
+      "type": "vue3-typescript",
+      "entry_files": ["src/main.ts", "src/App.vue"],
+      "key_interfaces": [
+        "src/api/index.ts",
+        "src/api/mjapi.ts",
+        "src/api/chat.ts",
+        "src/api/suno.ts",
+        "src/api/luma.ts",
+        "src/api/realtime.ts"
+      ],
+      "store_files": [
+        "src/store/modules/chat/index.ts",
+        "src/store/modules/auth/index.ts",
+        "src/store/modules/settings/index.ts",
+        "src/store/homeStore.ts"
+      ],
+      "router": "src/router/index.ts",
+      "views": [
+        "src/views/chat",
+        "src/views/mj",
+        "src/views/suno",
+        "src/views/luma",
+        "src/views/viggle",
+        "src/views/wav"
+      ],
+      "config_files": ["vite.config.ts", "tsconfig.json", ".eslintrc.cjs"],
+      "test_coverage": "low",
+      "has_tests": false
+    },
+    {
+      "name": "backend",
+      "path": "service",
+      "type": "express-typescript",
+      "entry_files": ["service/src/index.ts"],
+      "key_interfaces": [
+        "service/src/index.ts",
+        "service/src/chatgpt/index.ts",
+        "service/src/myfun.ts"
+      ],
+      "middleware": [
+        "service/src/middleware/auth.ts",
+        "service/src/middleware/limiter.ts"
+      ],
+      "config_files": ["service/package.json", "service/tsup.config.ts"],
+      "test_coverage": "low",
+      "has_tests": false
+    }
+  ],
+  "deployment": {
+    "docker": "Dockerfile",
+    "docker_compose": "docker-compose/*",
+    "kubernetes": "kubernetes/*",
+    "vercel": "supported"
+  },
+  "coverage": {
+    "total_files_estimated": 250,
+    "files_scanned": 150,
+    "coverage_percentage": 60,
+    "modules_covered": 2,
+    "modules_total": 2
+  },
+  "gaps": {
+    "missing_tests": true,
+    "missing_data_models": false,
+    "missing_documentation": false,
+    "areas_needing_depth": [
+      "src/views/*/components",
+      "service/src/utils",
+      "API integration patterns"
+    ]
+  },
+  "ignore_stats": {
+    "node_modules": "ignored",
+    "dist": "ignored",
+    "build": "ignored",
+    "uploads": "ignored",
+    ".git": "ignored"
+  },
+  "truncated": false,
+  "next_scan_recommendations": [
+    "深入扫描 src/views 下的各个模块组件",
+    "分析 service/src/myfun.ts 中的代理函数实现",
+    "补充测试策略文档",
+    "完善各 AI 服务集成（Midjourney, Suno, Luma, Runway等）的详细调用流程"
+  ]
+}
