@@ -647,11 +647,18 @@ const ychat = computed(() => {
               class="text-neutral-300 mt-4"
             ></div>
             <div
-              class="flex items-center justify-center mt-4 text-center text-neutral-300"
+              class="flex flex-col items-center justify-center mt-4 text-center"
               v-else
             >
-              <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
-              <span>Aha~</span>
+              <div class="flex items-center justify-center text-neutral-300 mb-4">
+                <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
+                <span class="text-2xl font-bold">欢迎使用 Nano Banana 2</span>
+              </div>
+              <div class="text-neutral-400 max-w-md space-y-2">
+                <p class="text-base">💬 直接提出您的要求</p>
+                <p class="text-base">🖼️ 或上传图片并提出修改要求</p>
+                <p class="text-sm mt-4 text-neutral-500">AI 将为您提供智能化的内容处理服务</p>
+              </div>
             </div>
           </template>
           <template v-else>
