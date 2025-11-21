@@ -13,7 +13,9 @@ model:[
  ,{  "label": "GPT-Image-1", "value": "gpt-image-1" }
  ,{  "label": "flux-kontext-pro", "value": "flux-kontext-pro" }
  ,{  "label": "flux-kontext-max", "value": "flux-kontext-max" }
+ ,{  "label": "nano-banana-2", "value": "nano-banana-2" }
  ,{  "label": "nano-banana", "value": "nano-banana" }
+ ,{  "label": "nano-banana-hd", "value": "nano-banana-hd" }
  ,{  "label": "DALL·E 2", "value": "dall-e-2" }
  ,{  "label": "Flux", "value": "flux" }
  ,{  "label": "Flux-Dev", "value": "flux-dev" }
@@ -96,17 +98,43 @@ const dimensionsList= computed(()=>{
     ];
     } 
     if(f.value.model=='gpt-image-1'){
-    return [{ 
-                "label": "1024px*1024px",
-                "value": "1024x1024"
-            }, {
-                "label": "1536px*1024px",
-                "value": "1536x1024"
-            }, {
-                "label": "1024px*1536px",
-                "value": "1024x1536"
-            }
-    ];
+        return [{ 
+                    "label": "1024px*1024px",
+                    "value": "1024x1024"
+                }, {
+                    "label": "1536px*1024px",
+                    "value": "1536x1024"
+                }, {
+                    "label": "1024px*1536px",
+                    "value": "1024x1536"
+                }
+        ];
+    }
+    if(f.value.model.includes('banana')){
+     return [{ 
+                    "label": "4:3",
+                    "value": "4x3"
+                }, {
+                    "label": "3:4",
+                    "value": "3x4"
+                }, {
+                    "label": "16:9",
+                    "value": "16x9"
+                }, {
+                    "label": "9:16",
+                    "value": "9x16"
+                }, {
+                    "label": "2:3",
+                    "value": "2x3"
+                }, {
+                    "label": "3:2",
+                    "value": "3x2"
+                }
+                , {
+                    "label": "1:1",
+                    "value": "1024x1024"
+                }
+        ];
     }
     return [{ 
                 "label": "1024px*1024px",
