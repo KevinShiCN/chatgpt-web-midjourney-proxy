@@ -8,6 +8,7 @@
 
 | 日期 | 版本 | 变更内容 |
 |------|------|----------|
+| 2025-11-21 | v1.1.0 | 增量更新：补充代理函数详细实现、工具函数库、文件上传处理 |
 | 2025-11-21 | v1.0.0 | 初始化后端模块文档 |
 
 ---
@@ -196,6 +197,286 @@ export const limiter = rateLimit({
 
 ---
 
+## 代理服务详解 (增量更新)
+
+### myfun.ts 代理函数架构
+
+`service/src/myfun.ts` 是核心代理模块，包含所有 AI 服务的代理实现。
+
+### 代理函数模式
+
+所有代理函数采用统一的架构模式：
+
+```typescript
+export const serviceProxy = proxy(process.env.SERVICE_SERVER ?? API_BASE_URL, {
+  https: false,
+  limit: '10mb',
+  proxyReqPathResolver: (req) => req.originalUrl,
+  proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+    // 设置认证头
+    if (process.env.SERVICE_KEY)
+      proxyReqOpts.headers['Authorization'] = 'Bearer ' + process.env.SERVICE_KEY;
+    else
+      proxyReqOpts.headers['Authorization'] = 'Bearer ' + process.env.OPENAI_API_KEY;
+
+    proxyReqOpts.headers['Content-Type'] = 'application/json';
+    proxyReqOpts.headers['Mj-Version'] = pkg.version;
+    return proxyReqOpts;
+  }
+});
+```
+
+### 视频服务代理
+
+#### lumaProxy
+
+**服务**: Luma AI 视频生成
+**环境变量**: `LUMA_SERVER`, `LUMA_KEY`
+**路由**: `/luma/*`, `/pro/luma/*`
+
+#### runwayProxy
+
+**服务**: Runway 视频生成
+**环境变量**: `RUNWAY_SERVER`, `RUNWAY_KEY`
+**路由**: `/runway/*`
+
+#### runwaymlProxy
+
+**服务**: Runway ML 官方 API
+**环境变量**: `RUNWAYML_SERVER`, `RUNWAYML_KEY`
+**路由**: `/runwayml/*`
+
+**特殊处理**:
+- 自动检测服务器是否为 `runwayml.com`
+- 自动添加 `X-Runway-Version` 头（当前: `2024-11-06`）
+
+```typescript
+proxyReqPathResolver: function (req) {
+  let url = req.originalUrl;
+  let server = process.env.RUNWAYML_SERVER ?? API_BASE_URL;
+  if (server.indexOf('runwayml.com') > -1) {
+    url = req.originalUrl.replace('/runwayml', '');
+  }
+  return url;
+}
+```
+
+#### klingProxy
+
+**服务**: Kling 视频生成
+**环境变量**: `KLING_SERVER`, `KLING_KEY`
+**路由**: `/kling/*`
+
+#### pikaProxy
+
+**服务**: Pika 视频生成
+**环境变量**: `PIKA_SERVER`, `PIKA_KEY`
+**路由**: `/pika/*`
+
+#### pixverseProxy
+
+**服务**: PixVerse 视频生成
+**环境变量**: `PIXVERSE_SERVER`, `PIXVERSE_KEY`
+**路由**: `/pixverse/*`
+
+### 舞蹈服务代理
+
+#### viggleProxy
+
+**服务**: Viggle AI 舞蹈生成
+**环境变量**: `VIGGLE_SERVER`, `VIGGLE_KEY`
+**路由**: `/viggle/*`, `/pro/viggle/*`
+
+#### viggleProxyFileDo
+
+**职责**: 处理 Viggle 文件上传
+
+```typescript
+export const viggleProxyFileDo = async (req: Request, res: Response, next?: NextFunction) => {
+  if (req.file.buffer) {
+    const fileBuffer = req.file.buffer;
+    const formData = new FormData();
+    formData.append('file', fileBuffer, { filename: req.file.originalname });
+
+    const url = `${API_BASE_URL}${req.originalUrl}`;
+    const responseBody = await axios.post(url, formData, {
+      headers: {
+        Authorization: 'Bearer ' + (process.env.VIGGLE_KEY ?? process.env.OPENAI_API_KEY),
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+
+    res.json(responseBody.data);
+  }
+}
+```
+
+### 绘图服务代理
+
+#### ideoProxy
+
+**服务**: Ideogram 绘图
+**环境变量**: `IDEO_SERVER`, `IDEO_KEY`
+**路由**: `/ideogram/*`
+
+#### ideoProxyFileDo
+
+**职责**: 处理 Ideogram 图片上传（remix 功能）
+
+```typescript
+export const ideoProxyFileDo = async (req: Request, res: Response, next?: NextFunction) => {
+  if (req.file.buffer) {
+    const formData = new FormData();
+    formData.append('image_file', fileBuffer, { filename: req.file.originalname });
+    formData.append('image_request', req.body.image_request);
+
+    const url = `${API_BASE_URL}${req.originalUrl}`;
+    const responseBody = await axios.post(url, formData, {
+      headers: {
+        Authorization: 'Bearer ' + (process.env.IDEO_KEY ?? process.env.OPENAI_API_KEY),
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+
+    res.json(responseBody.data);
+  }
+}
+```
+
+### 音乐服务代理
+
+#### sunoProxy
+
+**服务**: Suno AI 音乐生成
+**环境变量**: `SUNO_SERVER`, `SUNO_KEY`
+**路由**: `/sunoapi/*`, `/suno/*`
+
+**特殊处理**: 移除 URL 中的 `/sunoapi` 前缀
+
+```typescript
+proxyReqPathResolver: function (req) {
+  return req.originalUrl.replace('/sunoapi', '');
+}
+```
+
+#### udioProxy
+
+**服务**: Udio 音乐生成
+**环境变量**: `UDIO_SERVER`, `UDIO_KEY`
+**路由**: `/udio/*`
+
+### 图片编辑代理
+
+#### GptImageEdit
+
+**职责**: 处理 OpenAI 图片编辑 API (`/v1/images/edits`)
+
+**处理流程**:
+1. 解析 multipart/form-data 请求
+2. 构建 FormData 对象
+3. 处理上传的图片文件
+4. 转发到 OpenAI API
+5. 返回结果（移除 b64_json 详情）
+
+```typescript
+export const GptImageEdit = async (request: Request, response: Response, next?: NextFunction) => {
+  const formData = new FormData();
+
+  // 添加请求体字段
+  for (let o in req.body) {
+    formData.append(o, req.body[o]);
+  }
+
+  // 处理上传的文件
+  if (req.files) {
+    req.files.forEach((file) => {
+      formData.append(file.fieldname, file.buffer, {
+        filename: file.originalname,
+        contentType: file.mimetype,
+      });
+    });
+  }
+
+  // 发送到 OpenAI
+  const rqUrl = API_BASE_URL + "/v1/images/edits";
+  const responseBody = await axios.post(rqUrl, formData, {
+    headers: {
+      Authorization: 'Bearer ' + OPENAI_API_KEY,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  res.status(responseBody.status).send(responseBody.data);
+}
+```
+
+---
+
+## 工具函数库 (增量更新)
+
+### service/src/utils/ 目录结构
+
+```
+service/src/utils/
+├── index.ts         # 通用响应工具
+└── is.ts            # 类型判断函数
+```
+
+### 响应工具 (`utils/index.ts`)
+
+**接口**:
+```typescript
+interface SendResponseOptions<T = any> {
+  type: 'Success' | 'Fail'
+  message?: string
+  data?: T
+}
+```
+
+**函数**:
+```typescript
+export function sendResponse<T>(options: SendResponseOptions<T>) {
+  if (options.type === 'Success') {
+    return Promise.resolve({
+      message: options.message ?? null,
+      data: options.data ?? null,
+      status: options.type,
+    });
+  }
+
+  return Promise.reject({
+    message: options.message ?? 'Failed',
+    data: options.data ?? null,
+    status: options.type,
+  });
+}
+```
+
+### 类型判断 (`utils/is.ts`)
+
+**函数列表**:
+```typescript
+isNumber(value)           // 数字判断
+isString(value)           // 字符串判断
+isNotEmptyString(value)   // 非空字符串判断
+isBoolean(value)          // 布尔判断
+isFunction(value)         // 函数判断
+formattedDate()           // 获取格式化日期 (YYYYMMDD)
+```
+
+**formattedDate 实现**:
+```typescript
+export const formattedDate = () => {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+  const day = currentDate.getDate().toString().padStart(2, '0');
+  return `${year}${month}${day}`;
+}
+```
+
+---
+
 ## 代理服务实现
 
 ### Midjourney 代理 (`/mjapi/*`)
@@ -224,21 +505,6 @@ app.use('/openapi', authV2, turnstileCheck, proxy(API_BASE_URL, {
   }
 }))
 ```
-
-### 其他服务代理 (`service/src/myfun.ts`)
-
-**关键代理函数**:
-- `sunoProxy`: Suno 音乐生成代理
-- `lumaProxy`: Luma 视频生成代理
-- `viggleProxy`: Viggle 舞蹈生成代理
-- `viggleProxyFileDo`: Viggle 文件上传处理
-- `runwayProxy`, `runwaymlProxy`: Runway 视频代理
-- `klingProxy`: Kling 视频代理
-- `ideoProxy`, `ideoProxyFileDo`: Ideogram 代理
-- `pikaProxy`: Pika 视频代理
-- `udioProxy`: Udio 音乐代理
-- `pixverseProxy`: PixVerse 视频代理
-- `GptImageEdit`: GPT 图片编辑
 
 ---
 
@@ -364,7 +630,22 @@ async function chatReplyProcess(options: RequestOptions) {
 ## 常见问题 (FAQ)
 
 ### Q1: 如何添加新的代理服务？
-1. 在 `service/src/myfun.ts` 创建代理函数
+1. 在 `service/src/myfun.ts` 创建代理函数：
+   ```typescript
+   export const newServiceProxy = proxy(process.env.NEW_SERVER ?? API_BASE_URL, {
+     https: false, limit: '10mb',
+     proxyReqPathResolver: (req) => req.originalUrl,
+     proxyReqOptDecorator: (proxyReqOpts) => {
+       if (process.env.NEW_KEY)
+         proxyReqOpts.headers['Authorization'] = 'Bearer ' + process.env.NEW_KEY;
+       else
+         proxyReqOpts.headers['Authorization'] = 'Bearer ' + process.env.OPENAI_API_KEY;
+       proxyReqOpts.headers['Content-Type'] = 'application/json';
+       proxyReqOpts.headers['Mj-Version'] = pkg.version;
+       return proxyReqOpts;
+     }
+   });
+   ```
 2. 在 `service/src/index.ts` 添加路由：
    ```typescript
    app.use('/newservice', authV2, newServiceProxy)

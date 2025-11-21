@@ -1,6 +1,6 @@
 {
   "project_name": "chatgpt-web-midjourney-proxy",
-  "scan_timestamp": "2025-11-21T19:36:43.000Z",
+  "scan_timestamp": "2025-11-21T11:53:31.000Z",
   "version": "2.25.3",
   "modules": [
     {
@@ -31,6 +31,29 @@
         "src/views/viggle",
         "src/views/wav"
       ],
+      "components_detail": {
+        "chat": {
+          "Message": "src/views/chat/components/Message/index.vue",
+          "Text": "src/views/chat/components/Message/Text.vue",
+          "Avatar": "src/views/chat/components/Message/Avatar.vue",
+          "Header": "src/views/chat/components/Header/index.vue"
+        },
+        "mj": {
+          "draw": "src/views/mj/draw.vue",
+          "aiDrawInput": "src/views/mj/aiDrawInput.vue",
+          "aiSider": "src/views/mj/aiSider.vue",
+          "drawList": "src/views/mj/drawList.vue",
+          "aiModel": "src/views/mj/aiModel.vue",
+          "aiGallery": "src/views/mj/aiGallery.vue"
+        }
+      },
+      "utils": {
+        "request": "src/utils/request/index.ts",
+        "storage": "src/utils/storage/index.ts",
+        "copy": "src/utils/copy.ts",
+        "is": "src/utils/is/index.ts",
+        "functions": "src/utils/functions/index.ts"
+      },
       "config_files": ["vite.config.ts", "tsconfig.json", ".eslintrc.cjs"],
       "test_coverage": "low",
       "has_tests": false
@@ -45,10 +68,21 @@
         "service/src/chatgpt/index.ts",
         "service/src/myfun.ts"
       ],
+      "proxy_functions": {
+        "video": ["lumaProxy", "runwayProxy", "runwaymlProxy", "klingProxy", "pikaProxy", "pixverseProxy"],
+        "dance": ["viggleProxy", "viggleProxyFileDo"],
+        "drawing": ["ideoProxy", "ideoProxyFileDo"],
+        "music": ["sunoProxy", "udioProxy"],
+        "image_edit": ["GptImageEdit"]
+      },
       "middleware": [
         "service/src/middleware/auth.ts",
         "service/src/middleware/limiter.ts"
       ],
+      "utils": {
+        "sendResponse": "service/src/utils/index.ts",
+        "is": "service/src/utils/is.ts"
+      },
       "config_files": ["service/package.json", "service/tsup.config.ts"],
       "test_coverage": "low",
       "has_tests": false
@@ -62,19 +96,24 @@
   },
   "coverage": {
     "total_files_estimated": 250,
-    "files_scanned": 150,
-    "coverage_percentage": 60,
+    "files_scanned": 190,
+    "coverage_percentage": 76,
     "modules_covered": 2,
-    "modules_total": 2
+    "modules_total": 2,
+    "last_scan_coverage": 60,
+    "improvement": "+16%"
   },
   "gaps": {
     "missing_tests": true,
     "missing_data_models": false,
     "missing_documentation": false,
     "areas_needing_depth": [
-      "src/views/*/components",
-      "service/src/utils",
-      "API integration patterns"
+      "src/views/suno/components（音乐模块组件细节）",
+      "src/views/luma/components（视频模块组件细节）",
+      "src/views/viggle/components（舞蹈模块组件细节）",
+      "src/views/wav/components（实时语音模块组件细节）",
+      "API 参数和响应格式详细文档",
+      "WebSocket/SSE 实时通信机制"
     ]
   },
   "ignore_stats": {
@@ -85,10 +124,30 @@
     ".git": "ignored"
   },
   "truncated": false,
+  "scan_summary": {
+    "scanned_areas": [
+      "chat 组件结构（Message、Text、Header）",
+      "mj 组件结构（39+ 组件）",
+      "前端工具函数库（request、storage、copy、is）",
+      "后端代理函数（10+ AI 服务）",
+      "后端工具函数（sendResponse、is、formattedDate）",
+      "文件上传处理机制（Viggle、Ideogram）"
+    ],
+    "new_findings": [
+      "消息渲染支持 Markdown、代码高亮、LaTeX 公式",
+      "思考过程自动转换为引用格式（<think> 标签）",
+      "模型选择器支持 100+ 模型配置",
+      "统一的代理函数架构模式",
+      "Runway ML 特殊版本头处理",
+      "文件上传 FormData 处理流程"
+    ]
+  },
   "next_scan_recommendations": [
-    "深入扫描 src/views 下的各个模块组件",
-    "分析 service/src/myfun.ts 中的代理函数实现",
-    "补充测试策略文档",
-    "完善各 AI 服务集成（Midjourney, Suno, Luma, Runway等）的详细调用流程"
+    "深入扫描 src/views/suno、luma、viggle、wav 模块组件",
+    "分析各 AI 服务的详细 API 参数和响应格式",
+    "文档化 WebSocket/SSE 实时通信机制",
+    "补充 API 错误处理和重试策略",
+    "分析前端路由权限控制逻辑",
+    "文档化图片/音频/视频的本地存储策略"
   ]
 }

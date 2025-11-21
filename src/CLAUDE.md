@@ -8,6 +8,7 @@
 
 | 日期 | 版本 | 变更内容 |
 |------|------|----------|
+| 2025-11-21 | v1.1.0 | 增量更新：补充组件结构详情、工具函数库、消息渲染机制 |
 | 2025-11-21 | v1.0.0 | 初始化前端模块文档 |
 
 ---
@@ -248,6 +249,320 @@ src/store/
 
 ---
 
+## Chat 组件详解 (增量更新)
+
+### 组件层级结构
+
+```
+src/views/chat/
+├── index.vue                    # 主对话页面
+├── components/
+│   ├── index.ts                 # 组件导出
+│   ├── Header/
+│   │   └── index.vue           # 顶部工具栏
+│   └── Message/
+│       ├── index.vue           # 消息容器组件
+│       ├── Avatar.vue          # 头像组件
+│       └── Text.vue            # 文本渲染组件
+└── hooks/
+    ├── useChat.ts              # 聊天操作 hooks
+    ├── useScroll.ts            # 滚动控制 hooks
+    └── useUsingContext.ts      # 上下文控制 hooks
+```
+
+### Message 组件 (`components/Message/index.vue`)
+
+**职责**: 渲染单条消息，包括用户输入和 AI 响应
+
+**关键功能**:
+- 消息复制（`copyToClip`）
+- 消息重新生成（`handleRegenerate`）
+- TTS 语音朗读
+- 切换原始文本/Markdown 预览
+- 消息编辑/删除
+
+**Props 接口**:
+```typescript
+interface Props {
+  dateTime?: string
+  text?: string
+  inversion?: boolean  // 是否为用户消息
+  error?: boolean
+  loading?: boolean
+  chat: Chat.Chat
+  index: number
+}
+```
+
+**事件发射**:
+- `regenerate`: 重新生成回复
+- `delete`: 删除消息
+- `edit`: 编辑消息
+
+### Text 组件 (`components/Message/Text.vue`)
+
+**职责**: 渲染消息文本内容，支持多种格式
+
+**核心功能**:
+- Markdown 渲染（使用 `markdown-it`）
+- 代码高亮（使用 `highlight.js`）
+- LaTeX 公式支持（使用 `markdown-it-katex`）
+- 思考过程处理（`<think>` 标签转换为引用格式）
+
+**条件渲染**:
+- Midjourney 图片 (`mjText.vue`)
+- DALL-E 图片 (`dallText.vue`)
+- TTS 音频 (`ttsText.vue`)
+- Whisper 转录 (`whisperText.vue`)
+- API Key 错误提示 (`aiTextSetting.vue`)
+- 认证错误提示 (`aiSetAuth.vue`)
+
+### Header 组件 (`components/Header/index.vue`)
+
+**职责**: 对话页面顶部工具栏
+
+**功能**:
+- 显示当前对话标题
+- 导出对话
+- 清空对话
+- 模型切换弹窗（`aiModel.vue`）
+- 侧边栏折叠控制
+
+---
+
+## MJ 模块详解 (增量更新)
+
+### 组件层级结构
+
+```
+src/views/mj/
+├── index.ts                     # 组件导出
+├── draw.vue                     # 绘图主页面
+├── layout.vue                   # 布局组件
+├── drawList.vue                 # 绘图任务处理逻辑
+├── aiSider.vue                  # 侧边栏导航
+├── aiSiderInput.vue             # 侧边栏输入区域
+├── aiDrawInput.vue              # 绘图输入主组件（Tab 容器）
+├── aiDrawInputItem.vue          # MJ 绘图输入表单
+├── aiDall.vue                   # DALL-E 输入
+├── aiIdeoInput.vue              # Ideogram 输入
+├── aiFace.vue                   # 换脸功能
+├── aiBlend.vue                  # 混图功能
+├── aiCanvas.vue                 # 画布编辑
+├── aiEditImage.vue              # 图片编辑
+├── aiEditVidoe.vue              # 视频编辑
+├── aiFooter.vue                 # 底部组件
+├── aiGallery.vue                # 图库抽屉
+├── aiGalleryItem.vue            # 图库项
+├── aiGpts.vue                   # GPTs 列表
+├── aiGptsAdd.vue                # 添加 GPTs
+├── aiGptsCom.vue                # GPTs 组件
+├── aiGptInput.vue               # GPT 输入
+├── aiListText.vue               # 列表文本
+├── aiMic.vue                    # 麦克风
+├── aiMobileMenu.vue             # 移动端菜单
+├── aiModel.vue                  # 模型选择器
+├── aiModelServer.vue            # 服务端模型
+├── aiMsg.vue                    # 消息组件
+├── aiOther.vue                  # 其他功能
+├── aiSetAuth.vue                # 认证设置
+├── aiSetServer.vue              # 服务器设置
+├── aiTextSetting.vue            # 文本设置
+├── mjText.vue                   # MJ 文本渲染
+├── mjTextAttr.vue               # MJ 属性显示
+├── dallText.vue                 # DALL-E 文本
+├── ttsText.vue                  # TTS 文本
+├── whisperText.vue              # Whisper 文本
+└── myTest.vue                   # 测试组件
+```
+
+### aiDrawInput.vue（绘图输入主组件）
+
+**职责**: 绘图功能的 Tab 容器，整合多种绘图服务
+
+**Tab 结构**:
+1. **MidJourney** - 包含子 Tab:
+   - 绘图 (`aiDrawInputItem.vue`)
+   - 换脸 (`aiFace.vue`)
+   - 混图 (`aiBlend.vue`)
+2. **Dall.E** (`aiDall.vue`)
+3. **IdeoGram** (`aiIdeoInput.vue`)
+
+**事件**:
+- `drawSent`: 发送绘图任务
+- `close`: 关闭面板
+
+### aiSider.vue（侧边栏导航）
+
+**职责**: 左侧功能导航栏
+
+**导航项**:
+- Chat（对话）
+- Draw（绘图）
+- Music（音乐）
+- Video（视频）
+- GPTs（应用商店）
+- Gallery（图库）
+- Dance（舞蹈）
+- Realtime（实时语音）
+- Settings（设置）
+
+**特性**:
+- 支持菜单禁用 (`isDisableMenu`)
+- 响应式布局（移动端隐藏）
+- 头像显示
+- 百度/Google 统计集成
+
+### drawList.vue（绘图任务处理）
+
+**职责**: 处理绘图任务提交和状态更新
+
+**核心功能**:
+- 提交各类绘图任务（MJ/DALL-E/换脸/混图）
+- 监听 `homeStore.myData.act` 处理任务动作
+- 本地存储图片（`localSaveAny`）
+- 任务状态轮询和更新
+
+**任务类型**:
+- `face`: 换脸
+- `blend`: 混图
+- `gpt.dall-e-3`: DALL-E 绘图
+- `shorten`: 提示词精简
+- `mj.edit.video`: 视频编辑
+- `mj.edit.image`: 图片编辑
+- 普通 MJ 绘图
+
+### aiModel.vue（模型选择器）
+
+**职责**: AI 模型配置面板
+
+**配置项**:
+- 模型选择（支持 100+ 模型）
+- 自定义模型
+- 历史对话数
+- 最大 Token 数
+- 系统提示词
+- 高级参数（temperature, top_p, presence_penalty, frequency_penalty）
+- TTS 语音选择
+
+**支持的模型系列**:
+- OpenAI: GPT-3.5, GPT-4, GPT-4o, o1, o1-mini
+- Google: Gemini Pro
+- Anthropic: Claude 3 系列
+- DeepSeek: R1, V3
+- xAI: Grok 3 系列
+
+---
+
+## 工具函数库 (增量更新)
+
+### src/utils/ 目录结构
+
+```
+src/utils/
+├── copy.ts              # 剪贴板操作
+├── wav_renderer.ts      # 音频波形渲染
+├── functions/
+│   ├── index.ts         # 日期工具函数
+│   └── debounce.ts      # 防抖函数
+├── is/
+│   └── index.ts         # 类型判断函数
+├── request/
+│   ├── index.ts         # HTTP 请求封装
+│   └── axios.ts         # Axios 实例配置
+└── storage/
+    └── index.ts         # 本地存储封装
+```
+
+### HTTP 请求 (`request/index.ts`)
+
+**接口定义**:
+```typescript
+interface HttpOption {
+  url: string
+  data?: any
+  method?: string
+  headers?: any
+  onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void
+  signal?: GenericAbortSignal
+  beforeRequest?: () => void
+  afterRequest?: () => void
+}
+
+interface Response<T = any> {
+  data: T
+  message: string | null
+  status: string
+}
+```
+
+**主要导出**:
+- `get<T>()`: GET 请求
+- `post<T>()`: POST 请求
+- 默认导出 `post`
+
+**特性**:
+- 自动处理认证失败（刷新页面）
+- 支持流式下载进度
+- 请求前后钩子
+
+### 本地存储 (`storage/index.ts`)
+
+**功能**: 带过期时间的 localStorage 封装
+
+**默认过期时间**: 7 天
+
+**接口**:
+```typescript
+const storage = createLocalStorage({ expire?: number | null })
+
+storage.set(key, data)   // 存储数据
+storage.get(key)         // 获取数据（自动检查过期）
+storage.remove(key)      // 删除数据
+storage.clear()          // 清空所有
+```
+
+**预定义实例**:
+- `ls`: 7 天过期
+- `ss`: 永不过期
+
+### 类型判断 (`is/index.ts`)
+
+提供完整的类型守卫函数：
+
+```typescript
+isNumber(value)      // 数字
+isString(value)      // 字符串
+isBoolean(value)     // 布尔
+isNull(value)        // null
+isUndefined(value)   // undefined
+isObject(value)      // 对象
+isArray(value)       // 数组
+isFunction(value)    // 函数
+isDate(value)        // 日期
+isRegExp(value)      // 正则
+isPromise(value)     // Promise
+isSet(value)         // Set
+isMap(value)         // Map
+isFile(value)        // File
+```
+
+### 剪贴板操作 (`copy.ts`)
+
+```typescript
+function copyToClip(text: string): Promise<string>
+```
+
+使用传统的 `execCommand('copy')` 方式复制文本。
+
+### 日期工具 (`functions/index.ts`)
+
+```typescript
+function getCurrentDate(): string  // 返回 "YYYY-M-D" 格式
+```
+
+---
+
 ## 测试与质量
 
 ### 当前状态
@@ -296,6 +611,10 @@ src/store/
 ### Q5: 如何切换语言？
 - 通过 `src/store/modules/app/` 修改 `language` 状态
 - 支持的语言: `zh-CN`, `zh-TW`, `en-US`, `fr-FR`, `ko-KR`, `ru-RU`, `tr-TR`, `vi-VN`
+
+### Q6: 如何处理思考过程（Thinking）?
+- Text.vue 组件会自动将 `<think>...</think>` 标签转换为 Markdown 引用格式
+- 显示为 "Thinking..." 前缀的引用块
 
 ---
 
