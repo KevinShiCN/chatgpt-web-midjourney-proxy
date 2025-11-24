@@ -657,6 +657,7 @@ const ychat = computed(() => {
               <div class="text-neutral-400 max-w-md space-y-2">
                 <p class="text-base">💬 直接提出您的要求</p>
                 <p class="text-base">🖼️ 或上传图片并提出修改要求</p>
+                <p class="text-base">✨ 本工具直出 4K 分辨率图片，请保持耐心</p>
                 <p class="text-sm mt-4 text-neutral-500">AI 将为您提供智能化的内容处理服务</p>
               </div>
             </div>
