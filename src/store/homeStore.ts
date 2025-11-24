@@ -65,12 +65,12 @@ const  getDefault=()=>{
 const amodel = 'nano-banana-2-4k'
 let v:gptConfigType={
         model: amodel,
-        max_tokens:1024,
+        max_tokens:32768,
         userModel:'',
         talkCount:10,
         systemMessage:'',
-        temperature:0.5,
-        top_p:1,
+        temperature:1.0,
+        top_p:0.95,
         presence_penalty:0,
         frequency_penalty:0,
         tts_voice:"alloy"

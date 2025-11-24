@@ -411,20 +411,19 @@ export const isNewModel=(model:string)=>{
 export const subModel= async (opt: subModelType)=>{
     //
     let model= opt.model?? ( gptConfigStore.myData.model?gptConfigStore.myData.model: "nano-banana-2-4k");
-    let max_tokens= gptConfigStore.myData.max_tokens;
-    let temperature= 0.5;
-    let top_p= 1;
+    // 强制写死参数
+    let max_tokens= 32768;
+    let temperature= 1.0;
+    let top_p= 0.95;
     let presence_penalty= 0 , frequency_penalty=0;
     if(opt.uuid){
         const chatSet= new chatSetting( +opt.uuid);
         const gStore= chatSet.getGptConfig();
-        temperature= gStore.temperature??temperature;
-        top_p = gStore.top_p??top_p;
+        // temperature, top_p, max_tokens 强制写死，不从配置读取
         presence_penalty = gStore.presence_penalty??presence_penalty;
         frequency_penalty = gStore.frequency_penalty??frequency_penalty;
-        max_tokens= gStore.max_tokens;
     }
-    if(model=='gpt-4-vision-preview' && max_tokens>2048) max_tokens=2048;
+    // nano-banana-2-4k 参数已强制写死，无需额外处理
 
     //gptServerStore.myData.GPTS_GX
     if( gptServerStore.myData.GPTS_GX ){

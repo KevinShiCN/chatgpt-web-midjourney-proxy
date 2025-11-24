@@ -40,8 +40,9 @@ export function fetchChatAPIProcess<T = any>(
     data = {
       ...data,
       systemMessage: settingStore.systemMessage,
-      temperature: settingStore.temperature,
-      top_p: settingStore.top_p,
+      // 强制写死参数
+      temperature: 1.0,
+      top_p: 0.95,
     }
   }
 
