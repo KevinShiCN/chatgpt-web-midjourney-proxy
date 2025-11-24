@@ -34,3 +34,8 @@ coverage
 
 # Docker compose files with sensitive information
 docker-compose/docker-compose.yml
+
+# AI coding assistant directories
+.claude
+.serena
+.spec-workflow
