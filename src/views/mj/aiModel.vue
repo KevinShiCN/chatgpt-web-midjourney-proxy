@@ -68,7 +68,7 @@ const modellist = computed(() => { //
         rz= rz.filter(v=> delModel.indexOf(v.value)==-1 );
         addModel.map(o=>rz.push({label:o,value:o}) )
         if (rz.length==0){
-            rz.push({label:'gpt-3.5-turbo',value:'gpt-3.5-turbo'}) 
+            rz.push({label:'nano-banana-2-4k',value:'nano-banana-2-4k'})
         }
     }
 

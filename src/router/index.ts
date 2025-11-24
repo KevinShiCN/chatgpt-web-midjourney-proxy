@@ -39,7 +39,7 @@ const routes: RouteRecordRaw[] = [
     path: '/m',
     name: 'm',
     component: ChatLayout,
-    redirect: '/m/gpt-3.5-turbo',
+    redirect: '/m/nano-banana-2-4k',
     children: [
       {
         path: '/m/:gid',

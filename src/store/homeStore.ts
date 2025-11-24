@@ -62,7 +62,7 @@ const getGptInt= ():gptConfigType =>{
 }
 
 const  getDefault=()=>{
-const amodel = 'gemini-3-pro-image-preview'
+const amodel = 'nano-banana-2-4k'
 let v:gptConfigType={
         model: amodel,
         max_tokens:1024,
